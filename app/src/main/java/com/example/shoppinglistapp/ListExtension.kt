@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,9 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.util.UUID
-import kotlin.math.log
 
 
 @Composable
@@ -60,11 +59,11 @@ fun ShoppingListApp(modifier: Modifier = Modifier) {
                     shoppingListItems = shoppingListItems.map { it.copy(isEditing = false) }
                     val editedItem = shoppingListItems.find { it.id == item.id }
                     if (editedItem != null) {
-                        if (!(editedItem.name.isNullOrBlank() || editedItem.quantity.isNullOrBlank())){
+                        if (!(editedItem.name.isBlank() || editedItem.quantity.isBlank())){
                             editedItem.name = name
                             editedItem.quantity = quantity.toString()
                         }else{
-                            Log.e("Update", "error on values : ${editedItem.name} & ${editedItem.quantity }", )
+                            Log.e("Update", "error on values : ${editedItem.name} & ${editedItem.quantity }" )
                         }
                     }
                 } )
@@ -147,70 +146,42 @@ fun ShoppingListApp(modifier: Modifier = Modifier) {
 }
 
 
+@Preview(showBackground = true)
 @Composable
-fun EditItemLayout(item: ShoppingItem , onEditComplete :(String,Double) -> Unit){
-    var editedName by remember { mutableStateOf(item.name) }
-    var editedQuantity by remember { mutableStateOf(item.quantity) }
-    var isEditing by remember { mutableStateOf(item.isEditing) }
-    Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp)
-            .border(width = 2.dp, Color(0xFF547DDC), shape = RoundedCornerShape(20))
-    ){
-        Column{
-            BasicTextField(
-                value = editedName,
-                onValueChange = { editedName = it },
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(8.dp)
-            )
-            BasicTextField(
-                value = editedQuantity,
-                onValueChange = { if (it.all { c: Char -> c.isDigit() || c =='.' }) editedQuantity = it },
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(8.dp)
-            )
-            Spacer(modifier = Modifier.padding(vertical = 5.dp))
-        }
-        Button(
-                modifier = Modifier.align(Alignment.Bottom).padding(8.dp) ,
-        onClick = {
-            onEditComplete(editedName,editedQuantity.toDouble())
-        }) { Text(text = "Save") }
-
-    }
-
+fun ShoppingListAppPreview() {
+    ShoppingListApp()
 }
 
+@Preview(showBackground = true)
 @Composable
-fun ItemLayout(
-    item: ShoppingItem,
-    onEditClicked: () -> Unit,
-    onDeleteClicked :()-> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(width = 2.dp, Color(0xFF547DDC), shape = RoundedCornerShape(20))
-    ) {
-        Text(text = item.name , modifier = Modifier
-            .padding(8.dp)
-            .weight("2".toFloat(), true))
-        Text(text = "QTy: ${item.quantity}", modifier = Modifier
-            .padding(8.dp)
-            .weight("2".toFloat(), true))
-        Row(modifier = Modifier
-            .padding(8.dp)
-            .weight("2".toFloat(), true)) {
-            IconButton(onClick = onEditClicked ){
-                Icon(imageVector = Icons.Default.Edit , contentDescription = "EDIT BUTTON ")
-            }
-            IconButton(onClick = onDeleteClicked ){
-                Icon(imageVector = Icons.Default.Delete , contentDescription = "DELETE BUTTON ")
-            }
+fun PreviewEditItemLayout() {
+    val sampleItem = ShoppingItem(
+        id = "1",
+        name = "Milk",
+        quantity = "2",
+        isEditing = true
+    )
+
+    EditItemLayout(
+        item = sampleItem,
+        onEditComplete = { newName, newQuantity ->
+            println("Edited Item -> Name: $newName | Quantity: $newQuantity")
         }
-    }
+    )
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun ItemLayoutPreview() {
+    ItemLayout(
+        ShoppingItem(
+            "1",
+            "Milk",
+            "2"
+        ),
+        {},
+        {}
+    )
 }
